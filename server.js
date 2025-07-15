@@ -14,7 +14,6 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 // Allow all CORS requests
 app.use(
   cors({
