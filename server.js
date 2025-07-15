@@ -14,13 +14,32 @@ mongoose
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Allow all CORS requests
+
+// ✅ Replace with your deployed frontend URL
+const allowedOrigins = [
+  "https://login-registration-omega.vercel.app/",
+  "http://localhost:3000", // Optional: for local development
+];
+
+// ✅ CORS middleware
 app.use(
   cors({
-    origin: "*",
-    credentials: false,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Optional: if using cookies or Authorization
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// ✅ Handle preflight requests
+// app.options("*", cors());
+
 
 app.use(express.json());
 
