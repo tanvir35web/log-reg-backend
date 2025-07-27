@@ -2,20 +2,15 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const authRoutes = require("./backend/routes/authRoutes.js");
-const mongoose = require("mongoose");
+const productRoutes = require("./backend/routes/productRoutes.js");
+const authMiddleware = require("./backend/middlewares/authMiddleware.js");
+const sequelize = require("./backend/sequelize");
 
 dotenv.config();
-
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("MongoDB connection error:", err));
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-// Allow all CORS requests
 app.use(
   cors({
     origin: "*",
@@ -27,14 +22,14 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.get(
-  "/api/dashboard",
-  require("./backend/middlewares/authMiddleware"),
-  (req, res) => {
-    res.json({ message: "Welcome to your dashboard!", user: req.user });
-  }
-);
+app.use("/api/products", productRoutes);
+app.get("/api/dashboard", authMiddleware, (req, res) => {
+  res.json({ message: "Welcome to your dashboard!", user: req.user });
+});
 
-app.listen(PORT, () =>
-  console.log(`Server running on http://localhost:${PORT}`)
-);
+// Sync Sequelize and start server
+sequelize.sync().then(() => {
+  app.listen(PORT, () =>
+    console.log(`Server running on http://localhost:${PORT}`)
+  );
+});
